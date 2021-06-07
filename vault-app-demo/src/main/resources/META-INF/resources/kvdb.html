@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>KVDB REST service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
+    <!-- Load AngularJS -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script type="text/javascript">
+      var app = angular.module("KVDbManagement", []);
+
+      //Controller Part
+      app.controller("KVDbManagementController", function ($scope, $http) {
+
+        //Initialize page with default data which is blank in this example
+        $scope.kvdb = [];
+
+        $scope.form = {
+          key: "",
+          value: ""
+        };
+
+        //Now load the data from server
+        _refreshPageData();
+
+        //HTTP POST methods for add fruits
+        $scope.add = function () {
+          var data = { "key": $scope.form.key, "value": $scope.form.value };
+
+          $http({
+            method: "POST",
+            url: '/api/kvp',
+            data: angular.toJson(data),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(_success, _error);
+        };
+
+        /* Private Methods */
+        //HTTP GET- get all fruits collection
+        function _refreshPageData() {
+          $http({
+            method: 'GET',
+            url: '/api/kvp'
+          }).then(function successCallback(response) {
+            $scope.kvdb = response.data;
+          }, function errorCallback(response) {
+            console.log(response.statusText);
+          });
+        }
+
+        function _success(response) {
+          _refreshPageData();
+          _clearForm();
+        }
+
+        function _error(response) {
+          alert(response.data.message || response.statusText);
+        }
+
+        //Clear the form
+        function _clearForm() {
+          $scope.form.key = "";
+          $scope.form.value = "";
+        }
+      });
+    </script>
+</head>
+<body ng-app="KVDbManagement" ng-controller="KVDbManagementController">
+
+<div class="container">
+    <h1>REST Service - KVDB</h1>
+
+    <h3>Add a Key/Value Pair</h3>
+    <form ng-submit="add()">
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="Key" ng-model="form.key" size="60"/></div>
+        </div>
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="Value" ng-model="form.value" size="60"/></div>
+        </div>
+        <input type="submit" value="Save"/>
+    </form>
+
+    <h3>Key/Value Pairs List</h3>
+    <div class="row">
+        <div class="col-4">Key</div>
+        <div class="col-8">Value</div>
+    </div>
+    <div class="row" ng-repeat="kvp in kvdb">
+        <div class="col-4">{{ kvp.key }}</div>
+        <div class="col-8">{{ kvp.value }}</div>
+    </div>
+</div>
+
+</body>
+</html>
