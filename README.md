@@ -14,3 +14,9 @@ path "secret/data/myapps/vault-kvdb/*" {
   capabilities = ["read"]
 }
 EOF
+
+vault write auth/kubernetes/role/vault-kvdb-role \
+    bound_service_account_names=vault-auth-sa \
+    bound_service_account_namespaces=vault \
+    policies=vault-kvdb-policy \
+    ttl=1h
